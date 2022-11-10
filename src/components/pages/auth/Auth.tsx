@@ -1,7 +1,7 @@
 import React, {ChangeEvent, FC, SyntheticEvent, useEffect, useState} from 'react';
 import {TextField, ButtonGroup, Button, Grid, Alert} from "@mui/material";
 import type {IUserData} from "./types";
-import {createUserWithEmailAndPassword, signInWithEmailAndPassword} from 'firebase/auth';
+import {createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile} from 'firebase/auth';
 import {useAuth} from "../../providers";
 import {useNavigate} from "react-router-dom";
 
@@ -15,17 +15,22 @@ export const Auth: FC = () => {
   const [userData, setUserData] = useState<IUserData>({
     email: '',
     password: '',
+    name: '',
   })
   const [error, setError] = useState('')
 
-  const {email, password} = userData
+  const {email, password, name} = userData
 
   const handleLogin = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     if (isRegForm) {
       try {
-        await createUserWithEmailAndPassword(ga, email, password)
+        const response = await createUserWithEmailAndPassword(ga, email, password)
+        await updateProfile(
+          response.user, {
+            displayName: name
+          })
       } catch (error: any) {
         error?.message && setError(error?.message)
       }
@@ -41,7 +46,12 @@ export const Auth: FC = () => {
     setUserData({
       email: '',
       password: '',
+      name: ','
     })
+  }
+
+  const onChangeNameInputValue = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setUserData({...userData, name: e.target.value})
   }
 
   const onChangeEmailInputValue = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -64,6 +74,14 @@ export const Auth: FC = () => {
       <Grid display='flex' justifyContent='center' alignItems='center'>
         <form onSubmit={handleLogin}>
           <TextField
+            type='text'
+            label='name'
+            variant='outlined'
+            value={name}
+            onChange={(e) => onChangeNameInputValue(e)}
+            sx={{display: 'block', marginBottom: 3, marginTop: 2}}
+          />
+          <TextField
             type='email'
             label='email'
             variant='outlined'
@@ -82,8 +100,8 @@ export const Auth: FC = () => {
             required
           />
           <ButtonGroup variant="contained" sx={{display: 'flex', justifyContent: 'center'}}>
-            <Button type='submit' onClick={() => setIsRegForm(false)}>Auth</Button>
-            <Button type='submit' onClick={() => setIsRegForm(true)}>Register</Button>
+            <Button sx={{width: '50%'}} type='submit' onClick={() => setIsRegForm(false)}>Auth</Button>
+            <Button sx={{width: '50%'}} type='submit' onClick={() => setIsRegForm(true)}>Register</Button>
           </ButtonGroup>
         </form>
       </Grid>

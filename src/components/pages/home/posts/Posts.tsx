@@ -1,18 +1,32 @@
 import {Avatar, Box, ImageList, ImageListItem} from '@mui/material';
-import React, {FC} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {IPost} from "../../../types";
 import {Link} from "react-router-dom";
+import {onSnapshot, collection} from 'firebase/firestore';
+import {useAuth} from "../../../providers";
+import {initialPostState} from "../data";
 
-interface IPosts {
-  posts: IPost[]
-}
+export const Posts: FC = () => {
 
-export const Posts: FC<IPosts> = ({posts}) => {
+  const [posts, setPosts] = useState<IPost[]>(initialPostState)
+
+  const {db} = useAuth()
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'posts'), doc => {
+      doc.forEach((d: any) => {
+        setPosts((prev: IPost[]) => [...prev, d.data()])
+      })
+    })
+
+    return () => unsub()
+  }, [])
+
   return (
     <>
       {posts.map((post: IPost) => (
         <Box
-          key={post.author._id}
+          key={`${post.author._id}${Math.random()}`}
           sx={{
             border: '1px solid #CCCCCC',
             borderRadius: "10px",
@@ -20,7 +34,7 @@ export const Posts: FC<IPosts> = ({posts}) => {
             marginTop: 4,
           }}>
           <Link
-            to={`/profile/${post.author._id}`}
+            to={`/profile/${post.author._id}}`}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -56,8 +70,8 @@ export const Posts: FC<IPosts> = ({posts}) => {
           {post.images?.length && (
             <ImageList variant='masonry' cols={3} gap={8}>
               {
-                post.images.map((image: string, index: number) => (
-                  <ImageListItem key={index}>
+                post.images.map((image: string) => (
+                  <ImageListItem key={`${Math.random()}`}>
                     <img
                       src={image}
                       alt={''}
