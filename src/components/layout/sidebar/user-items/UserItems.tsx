@@ -21,7 +21,7 @@ export const UserItems: FC = () => {
       {users.map((user: IUser) => (
         <Link
           key={user._id}
-          to={`/profile/${user._id}`}
+          to={`/profile`}
           style={{
             display: 'flex',
             alignItems: 'center',

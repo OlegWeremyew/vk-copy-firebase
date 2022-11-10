@@ -9,7 +9,7 @@ export const routesList: routesListType[] = [
     auth: true,
   },
   {
-    path: '/profile/:id',
+    path: '/profile',
     exact: false,
     component: Profile,
     auth: true,

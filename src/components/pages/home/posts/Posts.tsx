@@ -5,6 +5,7 @@ import {Link} from "react-router-dom";
 import {onSnapshot, collection} from 'firebase/firestore';
 import {useAuth} from "../../../providers";
 import {initialPostState} from "../data";
+import {CardUI} from "../../../ui";
 
 export const Posts: FC = () => {
 
@@ -14,9 +15,11 @@ export const Posts: FC = () => {
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, 'posts'), doc => {
+      const array: IPost[] = [...posts]
       doc.forEach((d: any) => {
-        setPosts((prev: IPost[]) => [...prev, d.data()])
+        array.push(d.data())
       })
+      setPosts(array)
     })
 
     return () => unsub()
@@ -25,14 +28,7 @@ export const Posts: FC = () => {
   return (
     <>
       {posts.map((post: IPost) => (
-        <Box
-          key={`${post.author._id}${Math.random()}`}
-          sx={{
-            border: '1px solid #CCCCCC',
-            borderRadius: "10px",
-            padding: 2,
-            marginTop: 4,
-          }}>
+        <CardUI key={post.author._id}>
           <Link
             to={`/profile/${post.author._id}}`}
             style={{
@@ -82,7 +78,7 @@ export const Posts: FC = () => {
               }
             </ImageList>
           )}
-        </Box>
+        </CardUI>
       ))}
     </>
   )
